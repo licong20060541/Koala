@@ -1,7 +1,7 @@
 package com.lijiankun24.koalademo;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
@@ -12,7 +12,7 @@ import com.lijiankun24.koala.KoalaLog;
  * <p>
  * Created by lijiankun24 on 2018/7/29.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
 

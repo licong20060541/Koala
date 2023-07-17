@@ -1,5 +1,7 @@
 package com.lijiankun24.koala;
 
+import org.gradle.api.Project;
+import org.gradle.api.logging.LogLevel;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -31,13 +33,16 @@ class KoalaLogMethodVisitor extends AdviceAdapter {
 
     private Type[] argumentArrays;
 
-    KoalaLogMethodVisitor(int api, MethodVisitor mv, int access, String className, String methodName, String desc) {
+    Project project;
+
+    KoalaLogMethodVisitor(int api, MethodVisitor mv, int access, String className, String methodName, String desc, Project project) {
         super(api, mv, access, methodName, desc);
         this.className = className;
         this.methodName = methodName;
         this.desc = desc;
         argumentArrays = Type.getArgumentTypes(desc);
         isStaticMethod = ((access & Opcodes.ACC_STATIC) != 0);
+        this.project = project;
     }
 
     @Override
@@ -48,6 +53,9 @@ class KoalaLogMethodVisitor extends AdviceAdapter {
         return super.visitAnnotation(desc, visible);
     }
 
+    /**
+     * box自动装箱，不调用会编译报错
+     */
     @Override
     protected void onMethodEnter() {
         if (isInjected) {
@@ -88,6 +96,7 @@ class KoalaLogMethodVisitor extends AdviceAdapter {
                 mv.visitVarInsn(ILOAD, methodId);
                 visitMethodInsn(INVOKESTATIC, "com/lijiankun24/koala/core/MethodCache", "addMethodArgument",
                         "(Ljava/lang/Object;I)V", false);
+                project.getLogger().log(LogLevel.ERROR,"------------licongxx: argumentArrays：type: " + type);
             }
 
             startTimeId = newLocal(Type.LONG_TYPE);
@@ -99,6 +108,7 @@ class KoalaLogMethodVisitor extends AdviceAdapter {
     @Override
     protected void onMethodExit(int opcode) {
         if (isInjected) {
+            project.getLogger().log(LogLevel.ERROR,"------------licongxx: onMethodExit：opcode: " + opcode);
             if (opcode == RETURN) {
                 visitInsn(ACONST_NULL);
             } else if (opcode == ARETURN || opcode == ATHROW) {
@@ -123,5 +133,13 @@ class KoalaLogMethodVisitor extends AdviceAdapter {
             mv.visitMethodInsn(INVOKESTATIC, "com/lijiankun24/koala/core/MethodCache",
                     "printMethodInfo", "(I)V", false);
         }
+    }
+
+    @Override
+    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+        super.visitMethodInsn(opcode, owner, name, desc, itf);
+        project.getLogger().log(
+                LogLevel.ERROR,"------------licongxx: owner:" + owner + ", name: " + name + ", desc: " + desc
+        );
     }
 }

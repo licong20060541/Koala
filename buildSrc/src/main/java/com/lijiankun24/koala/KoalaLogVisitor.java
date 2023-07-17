@@ -1,5 +1,6 @@
 package com.lijiankun24.koala;
 
+import org.gradle.api.Project;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -12,9 +13,11 @@ import org.objectweb.asm.Opcodes;
 public class KoalaLogVisitor extends ClassVisitor {
 
     private String mClassName;
+    Project project;
 
-    public KoalaLogVisitor(ClassVisitor classVisitor) {
+    public KoalaLogVisitor(ClassVisitor classVisitor, Project project) {
         super(Opcodes.ASM5, classVisitor);
+        this.project = project;
     }
 
     @Override
@@ -26,7 +29,7 @@ public class KoalaLogVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor methodVisitor = super.visitMethod(access, name, desc, signature, exceptions);
-        methodVisitor = new KoalaLogMethodVisitor(Opcodes.ASM5, methodVisitor, access, mClassName, name, desc);
+        methodVisitor = new KoalaLogMethodVisitor(Opcodes.ASM5, methodVisitor, access, mClassName, name, desc, project);
         return methodVisitor;
     }
 }

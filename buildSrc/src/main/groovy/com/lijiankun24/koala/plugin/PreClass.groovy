@@ -55,7 +55,7 @@ class PreClass extends Transform {
 
                             ClassReader reader = new ClassReader(file.bytes)
                             ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
-                            ClassVisitor visitor = new KoalaLogVisitor(writer)
+                            ClassVisitor visitor = new KoalaLogVisitor(writer, project)
                             reader.accept(visitor, ClassReader.EXPAND_FRAMES)
 
                             byte[] code = writer.toByteArray()
